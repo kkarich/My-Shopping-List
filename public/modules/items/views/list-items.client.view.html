@@ -1,0 +1,23 @@
+<section data-ng-controller="ItemsController" data-ng-init="find()">
+ 
+    <form ng-submit = "create(name)">
+     <div class="input-group">
+      <input ng-model = "name" type="text" class="form-control" placeholder="Search for...">
+      <span class="input-group-btn">
+        <button  type = "submit" class="btn btn-default">Add!</button>
+      </span>
+    </div>
+    </form>
+    <div class="list-group">
+        <div data-ng-repeat="item in items" class="list-group-item">
+            <i ng-class="item.inCart? ' fa fa-check-square-o fa-2x' : 'fa fa-square-o fa-2x'"
+                        ng-click="addToCart(item)" ></i>
+			<h4 class="list-group-item-heading" data-ng-bind="item.name"></h4>
+			<i ng-class="item.favorite? ' fa fa-heart fa-2x' : 'fa fa-heart-o fa-2x'"
+                        ng-click="favorite(item)" ></i>
+        </div>
+    </div>
+    <div class="alert alert-warning text-center" data-ng-hide="!items.$resolved || items.length">
+    	No Items yet, why don't you <a href="/#!/items/create">create one</a>?
+    </div>
+</section>
