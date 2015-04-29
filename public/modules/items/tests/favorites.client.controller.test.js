@@ -50,56 +50,169 @@
 			});
 		}));
 
-		it('$scope.find() should create an array with at least one Favorite Item object fetched from XHR', inject(function(Items) {
+		it('$scope.find() should create an array with at least one Favorite Item object defaulted to addToList = true', inject(function(Items) {
 			// Create sample Item using the Items service
 			var sampleItem = new Items({
-				name: 'New Item'
+				name : 'New Item', 
+				favorite : true, 
+				addToList : false
 			});
 
 			// Create a sample Items array that includes the new Item
 			var sampleItems = [sampleItem];
 
 			// Set GET response
-			$httpBackend.expectGET('items').respond(sampleItems);
+			$httpBackend.expectGET('favorites').respond(sampleItems);
 
 			// Run controller functionality
 			scope.find();
 			$httpBackend.flush();
 
 			// Test scope value
-			expect(scope.items).toEqualData(sampleItems);
+		
+			expect(scope.favorites[0].addToList).toEqual(true)
+			
 		}));
-
-
-		it('$scope.addToList() with valid form data should send a POST request with the form input values and then locate to new object URL', inject(function(Items) {
-			// Create a sample Item object
-			var sampleItemPostData = new Items({
-				name: 'New Item'
-			});
-
-			// Create a sample Item response
-			var sampleItemResponse = new Items({
+        
+        	it('$scope.addToList() with valid form data should send a PUT request with the form input values and then locate to new object URL', inject(function(Items) {
+			
+			var sampleItem_1 = new Items({
 				_id: '525cf20451979dea2c000001',
-				name: 'New Item'
+				name: 'New Item',
+				bought:true,
+				inCart:true,
+				addToList:true
+			});
+			
+			var sampleItem_2 = new Items({
+				_id: '525cf20451979dea2c000002',
+				name: 'New Item',
+				bought:true,
+				inCart:false,
+				addToList:true
+			});
+			
+			var sampleItem_3 = new Items({
+				_id: '525cf20451979dea2c000003',
+				name: 'New Item',
+				bought:false,
+				inCart:false,
+				addToList:true
+			});
+			
+				var sampleItem_4 = new Items({
+				_id: '525cf20451979dea2c000004',
+				name: 'New Item',
+				bought:false,
+				inCart:false,
+				addToList:true
+			});
+			
+			var sampleItem_5 = new Items({
+				_id: '525cf20451979dea2c000004',
+				name: 'New Item',
+				bought:true,
+				inCart:true,
+				addToList:false
+			});
+			
+			var sampleItem_1 = new Items({
+				_id: '525cf20451979dea2c000001',
+				name: 'New Item',
+				bought:true,
+				inCart:true,
+				addToList:true
+			});
+			
+			var sampleItem_2 = new Items({
+				_id: '525cf20451979dea2c000002',
+				name: 'New Item',
+				bought:true,
+				inCart:false,
+				addToList:true
+			});
+			
+			var sampleItem_3 = new Items({
+				_id: '525cf20451979dea2c000003',
+				name: 'New Item',
+				bought:false,
+				inCart:false,
+				addToList:true
+			});
+			
+				var sampleItem_4 = new Items({
+				_id: '525cf20451979dea2c000004',
+				name: 'New Item',
+				bought:false,
+				inCart:false,
+				addToList:true
+			});
+			
+			var sampleItem_5 = new Items({
+				_id: '525cf20451979dea2c000004',
+				name: 'New Item',
+				bought:true,
+				inCart:true,
+				addToList:false
 			});
 
-			// Fixture mock form input values
-			scope.name = 'New Item';
+		
+            scope.favorites = [sampleItem_1,sampleItem_2,sampleItem_3,sampleItem_4,sampleItem_5];
+			
+			// Set PUT response for each item with addToList == true
+			$httpBackend.expectPUT(/items\/([0-9a-fA-F]{24})$/).respond();
+            $httpBackend.expectPUT(/items\/([0-9a-fA-F]{24})$/).respond();
+            $httpBackend.expectPUT(/items\/([0-9a-fA-F]{24})$/).respond();
+            $httpBackend.expectPUT(/items\/([0-9a-fA-F]{24})$/).respond();
+        
+            
+			// Run controller functionality
+			scope.addToList();
+			$httpBackend.flush();
+		    
+		    //every item with addToList ==true should have bought = false and inCarrt = false
+            expect(scope.favorites[0].bought).toEqual(false);
+			expect(scope.favorites[0].inCart).toEqual(false);
+			
+			expect(scope.favorites[1].bought).toEqual(false);
+			expect(scope.favorites[1].inCart).toEqual(false);
+			
+			expect(scope.favorites[2].bought).toEqual(false);
+			expect(scope.favorites[2].inCart).toEqual(false);
+			
+			expect(scope.favorites[3].bought).toEqual(false);
+			expect(scope.favorites[3].inCart).toEqual(false);
+			
+			//Last item with addToList == false should remain unchanged
+			expect(scope.favorites[4].bought).toEqual(true);
+			expect(scope.favorites[4].inCart).toEqual(true);
+			
+			
+		}));
+		
+		it('$scope.checkAddToList() should reverse addToList value', inject(function(Items) {
+			// Define a sample Item put data
+			var sampleItemPutData = new Items({
+				_id: '525cf20451979dea2c000001',
+				name: 'New Item',
+				addToList:true
+			});
 
-			// Set POST response
-			$httpBackend.expectPOST('items', sampleItemPostData).respond(sampleItemResponse);
+			// Mock Item in scope
+			var item = sampleItemPutData;
 
 			// Run controller functionality
-			scope.create(sampleItemPostData.name);
-			$httpBackend.flush();
+			scope.checkAddToList(item);
+			
+			expect(item.addToList).toEqual(false);
+			
+			scope.checkAddToList(item);
+			
+			expect(item.addToList).toEqual(true);
 
-			// Test form inputs are reset
-			expect(scope.name).toEqual('');
-
-			// Test URL redirection after the Item was created
-			//expect($location.path()).toBe('/items/' + sampleItemResponse._id);
+			
 		}));
-
+       /*
 		it('$scope.update() should update a valid Item', inject(function(Items) {
 			// Define a sample Item put data
 			var sampleItemPutData = new Items({
@@ -117,10 +230,9 @@
 			scope.update(item);
 			$httpBackend.flush();
 
-			// Test URL location to new object
-			//expect($location.path()).toBe('/items/' + sampleItemPutData._id);
+			
 		}));
-
+           
 		it('$scope.remove() should send a DELETE request with a valid itemId and remove the Item from the scope', inject(function(Items) {
 			// Create new Item object
 			var sampleItem = new Items({
@@ -140,5 +252,8 @@
 			// Test array after successful delete
 			expect(scope.items.length).toBe(0);
 		}));
+        */
+
+	
 	});
 }());

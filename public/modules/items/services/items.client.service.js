@@ -5,8 +5,13 @@ angular.module('items').factory('Items', ['$resource',
 	function($resource) {
 		return $resource('items/:itemId', { itemId: '@_id'
 		}, {
-			update: {
+		    update: {
 				method: 'PUT'
+			},
+			favorites:{
+			    url: 'favorites',
+			    method: 'GET',
+			    isArray:true,
 			}
 		});
 	}

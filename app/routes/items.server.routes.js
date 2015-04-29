@@ -9,6 +9,9 @@ module.exports = function(app) {
 		.get(items.list)
 		.post(users.requiresLogin, items.create);
 
+    app.route('/favorites')
+		.get(items.favorites);
+
 	app.route('/items/:itemId')
 		.get(items.read)
 		.put(users.requiresLogin, items.hasAuthorization, items.update)

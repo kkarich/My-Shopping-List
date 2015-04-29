@@ -13,6 +13,15 @@ angular.module('side-nav').controller('SideNavController', ['$scope', '$modal',
           size: size
         });
 	};
+	
+	 $scope.openFavorites = function (size) {
+
+        var modalInstance = $modal.open({
+          templateUrl: '/modules/items/views/favorites.client.view.html',
+          controller: 'FavoritesController',
+          size: size
+        });
+	};
 
 		
 	}

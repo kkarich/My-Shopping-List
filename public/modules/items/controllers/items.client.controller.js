@@ -52,6 +52,8 @@ angular.module('items').controller('ItemsController', ['$scope', '$stateParams',
 		// Find a list of Items
 		$scope.find = function() {
 			$scope.items = Items.query();
+			
+		
 		};
 
 		// Find existing Item

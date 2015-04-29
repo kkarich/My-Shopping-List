@@ -84,6 +84,18 @@ exports.list = function(req, res) {
 	});
 };
 
+exports.favorites = function(req, res) { 
+	Item.find({favorite:true}).sort('-created').populate('user', 'displayName').exec(function(err, items) {
+		if (err) {
+			return res.status(400).send({
+				message: errorHandler.getErrorMessage(err)
+			});
+		} else {
+			res.jsonp(items);
+		}
+	});
+};
+
 /**
  * Item middleware
  */
