@@ -62,32 +62,32 @@
 .sidebar-nav {
     position: absolute;
     top: 0;
-    width: 250px;
+    width: 150px;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-.sidebar-nav li {
-    text-indent: 20px;
-    line-height: 40px;
+.sidebar-nav div {
+     padding-top: 25px;
+     padding-bottom: 25px;
 }
 
-.sidebar-nav li i {
+.sidebar-nav div i {
     display: block;
     text-decoration: none;
     color: #999999;
 }
 
-.sidebar-nav li i:hover {
+.sidebar-nav div i:hover {
     text-decoration: none;
     color: #fff;
     cursor:pointer;
    
 }
 
-.sidebar-nav li i:active,
-.sidebar-nav li i:focus {
+.sidebar-nav div i:active,
+.sidebar-nav div i:focus {
     text-decoration: none;
 }
 

@@ -1,17 +1,9 @@
 
- <ul ng-controller="SideNavController" class="sidebar-nav">
+ 
+ <div class="row sidebar-nav" ng-controller="SideNavController">
+  <div class="col-md-12"><p class="text-center"><i ng-click = "openProfile()" class="fa fa-user fa-4x"></i></p></div>
+  <div class="col-md-12"><p class="text-center"><i ng-click = "openFavorites()" class="fa fa-heart fa-4x"></i></p></div>
+  <div class="col-md-12"><p class="text-center"><i ng-click = "openRecipe()" class="fa fa-cutlery fa-4x"></i></p></div>
+  <div class="col-md-12"><p class="text-center">sign out</p></div>
+</div>
                
-                <li>
-                    <i ng-click = "openProfile()" class="fa fa-user fa-4x"></i>
-                </li>
-                <li>
-                    <i ng-click = "openFavorites()" class="fa fa-heart fa-4x"></i>
-                </li>
-                <li>
-                    <i ng-click = "openRecipe()" class="fa fa-cutlery fa-4x"></i>
-                </li>
-                <li>
-                    <a href="#">Sign Out</a>
-                </li>
-              
-            </ul>

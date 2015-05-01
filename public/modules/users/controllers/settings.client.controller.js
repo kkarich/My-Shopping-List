@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('users').controller('SettingsController', ['$scope', '$http', '$location', 'Users', 'Authentication',
-	function($scope, $http, $location, Users, Authentication) {
+angular.module('users').controller('SettingsController', ['$scope', '$http', '$location', 'Users', 'Authentication','$modalInstance',
+	function($scope, $http, $location, Users, Authentication,$modalInstance) {
 		$scope.user = Authentication.user;
 
 		// If user is not signed in then redirect back home
@@ -66,6 +66,12 @@ angular.module('users').controller('SettingsController', ['$scope', '$http', '$l
 			}).error(function(response) {
 				$scope.error = response.message;
 			});
+		};
+		
+		$scope.cancel = function(){
+		
+            $modalInstance.dismiss('cancel');
+            
 		};
 	}
 ]);

@@ -5,21 +5,27 @@ angular.module('side-nav').controller('SideNavController', ['$scope', '$modal',
 		// Side nav controller logic
 		// ...
 		
-    $scope.openRecipe = function (size) {
+	$scope.openProfile = function () {
+
+        var modalInstance = $modal.open({
+          templateUrl: '/modules/users/views/settings/edit-profile.client.view.html',
+          controller: 'SettingsController'
+        });
+	};
+		
+    $scope.openRecipe = function () {
 
         var modalInstance = $modal.open({
           templateUrl: '/modules/recipe/views/recipe.client.view.html',
-          controller: 'RecipeController',
-          size: size
+          controller: 'RecipeController'
         });
 	};
 	
-	 $scope.openFavorites = function (size) {
+	 $scope.openFavorites = function () {
 
         var modalInstance = $modal.open({
           templateUrl: '/modules/items/views/favorites.client.view.html',
-          controller: 'FavoritesController',
-          size: size
+          controller: 'FavoritesController'
         });
 	};
 

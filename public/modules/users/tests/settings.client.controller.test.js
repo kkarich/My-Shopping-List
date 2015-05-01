@@ -1,10 +1,10 @@
 'use strict';
 
 (function() {
-	// Recipe Controller Spec
-	describe('Recipe Controller Tests', function() {
+	// Settings Controller Spec
+	describe('Settings Controller Tests', function() {
 		// Initialize global variables
-		var RecipeController,
+		var SettingsController,
 			scope,
 			$httpBackend,
 			$stateParams,
@@ -40,7 +40,7 @@
 			// Set a new global scope
 			scope = $rootScope.$new();
 			
-			  modalInstance = {                    // Create a mock object using spies
+			 modalInstance = {                    // Create a mock object using spies
                     close: jasmine.createSpy('modalInstance.close'),
                     dismiss: jasmine.createSpy('modalInstance.dismiss'),
                     result: {
@@ -53,61 +53,16 @@
 			$httpBackend = _$httpBackend_;
 			$location = _$location_;
 
-			// Initialize the Recipe controller.
-			RecipeController = $controller('RecipeController', {
+			// Initialize the Settings controller.
+			SettingsController = $controller('SettingsController', {
 				$scope: scope,
 				$modalInstance: modalInstance
 			});
 		}));
 
-		it('convertRecipe() Should split recipe into items by "carrage return" and send POST request for each item', inject(function(Items) {
-		    
-            scope.recipe = "item 1 \n item 2 \n item 3";
-            
-            var sampleItemPostData1 = new Items({
-				name: 'item 1'
-			});
-			
-			var sampleItemPostData2 = new Items({
-				name: 'item 2'
-			});
-			
-			var sampleItemPostData3 = new Items({
-				name: 'item 3'
-			});
-			
-			var sampleItemResponse1 = new Items({
-				_id: '525cf20451979dea2c000001',
-				name: 'item 1'
-			});
-			
-			var sampleItemResponse2 = new Items({
-				_id: '525cf20451979dea2c000002',
-				name: 'item 2'
-			});
-			
-			var sampleItemResponse3 = new Items({
-				_id: '525cf20451979dea2c000003',
-				name: 'item 3'
-			});
-            
-           
-            
-            $httpBackend.expectPOST('items', sampleItemPostData1).respond(sampleItemResponse1);
-            $httpBackend.expectPOST('items', sampleItemPostData2).respond(sampleItemResponse2);
-            $httpBackend.expectPOST('items', sampleItemPostData3).respond(sampleItemResponse3);
-            
-            scope.convertRecipe();
-            $httpBackend.flush();
-            
-            expect(scope.recipe).toEqual('');
-		}));
-		
-		it('convertRecipe Should close modal', inject(function(Items) {
-		    
-		    scope.convertRecipe();
-		    expect(modalInstance.close).toHaveBeenCalled();
-          
+		it('Should do some controller test', inject(function() {
+			// The test logic
+			// ...
 		}));
 		
 		it('cancel() Should dismiss modal', inject(function(Items) {
@@ -117,5 +72,6 @@
 
           
 		}));
+		
 	});
 }());

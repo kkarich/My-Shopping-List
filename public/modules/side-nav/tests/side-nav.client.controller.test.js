@@ -8,6 +8,7 @@
 			scope,
 			$httpBackend,
 			$stateParams,
+			modal,
 			$location;
 
 		// The $resource service augments the response object with methods for updating and deleting the resource.
@@ -38,6 +39,8 @@
 		beforeEach(inject(function($controller, $rootScope, _$location_, _$stateParams_, _$httpBackend_) {
 			// Set a new global scope
 			scope = $rootScope.$new();
+			
+			modal = jasmine.createSpyObj('modal', ['show', 'hide','open']);
 
 			// Point global variables to injected services
 			$stateParams = _$stateParams_;
@@ -46,22 +49,45 @@
 
 			// Initialize the Side nav controller.
 			SideNavController = $controller('SideNavController', {
-				$scope: scope
+				$scope: scope,
+				$modal:modal
 			});
 		}));
 
-		it('Should open user profile on profile click', inject(function() {
+		it('openProfile() Should open user profile in modal', inject(function() {
+		    
+		  var modalInstance = {
+                  templateUrl: '/modules/users/views/settings/edit-profile.client.view.html',
+                  controller: 'SettingsController'
+                };
+			scope.openProfile();
+			expect(modal.open).toHaveBeenCalledWith(modalInstance);
 			
 		}));
 		
-		it('Should open recipe modal on recipe click', inject(function() {
+		it('openRecipe() Should open recipe modal', inject(function() {
 			// The test logic
 			// ...
+			
+			  var modalInstance = {
+                  templateUrl: '/modules/recipe/views/recipe.client.view.html',
+                  controller: 'RecipeController'
+                };
+			scope.openRecipe();
+			expect(modal.open).toHaveBeenCalledWith(modalInstance);
 		}));
 		
-		it('Should open favorites modal on favorites click', inject(function() {
+		it('openFavorites() Should open favorites modal', inject(function() {
 			// The test logic
 			// ...
+			
+			 var modalInstance = {
+                  templateUrl: '/modules/items/views/favorites.client.view.html',
+                  controller: 'FavoritesController'
+                };
+			
+			scope.openFavorites();
+			expect(modal.open).toHaveBeenCalledWith(modalInstance);
 		}));
 	});
 }());

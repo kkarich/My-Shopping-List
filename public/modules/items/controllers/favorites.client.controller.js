@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('items').controller('FavoritesController', ['$scope','Items',
-	function($scope,Items) {
+angular.module('items').controller('FavoritesController', ['$scope','$modalInstance', 'Items',
+	function($scope,$modalInstance,Items) {
 		// Favorites controller logic
 		// ...
 		
@@ -39,13 +39,21 @@ angular.module('items').controller('FavoritesController', ['$scope','Items',
 				            $scope.error = errorResponse.data.message;
                     });
                 }
+               
 		    }
+		     $modalInstance.close();
             
 		};
 		
 		$scope.checkAddToList = function(item){
 		
             item.addToList = !item.addToList;
+            
+		};
+		
+		$scope.cancel = function(){
+		
+           $modalInstance.dismiss('cancel');
             
 		};
 		
