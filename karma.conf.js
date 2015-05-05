@@ -7,13 +7,16 @@ var applicationConfiguration = require('./config/config');
 
 // Karma configuration
 module.exports = function(config) {
+   
 	config.set({
 		// Frameworks to use
 		frameworks: ['jasmine'],
 
 		// List of files / patterns to load in the browser
-		files: applicationConfiguration.assets.lib.js.concat(applicationConfiguration.assets.js, applicationConfiguration.assets.tests),
-
+		files: applicationConfiguration.assets.lib.js.concat(applicationConfiguration.assets.js, applicationConfiguration.assets.tests,['base/public/lib/angular-socket-io/socket.js']),
+        
+        
+        
 		// Test results reporter to use
 		// Possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
 		//reporters: ['progress'],
@@ -49,4 +52,5 @@ module.exports = function(config) {
 		// If true, it capture browsers, run tests and exit
 		singleRun: false
 	});
+	 
 };

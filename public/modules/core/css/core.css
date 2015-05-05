@@ -1,6 +1,4 @@
-.content {
-	margin-top: 50px;
-}
+
 .undecorated-link:hover {
 	text-decoration: none;
 }
@@ -55,6 +53,12 @@
 #wrapper.toggled #page-content-wrapper {
     position: absolute;
     margin-right: -250px;
+    padding-top: 25px;
+}
+
+#page-content-wrapper {
+  
+    padding-top: 25px;
 }
 
 /* Sidebar Styles */
@@ -73,13 +77,13 @@
      padding-bottom: 25px;
 }
 
-.sidebar-nav div i {
+.sidebar-nav div i,.sidebar-nav div a  {
     display: block;
     text-decoration: none;
     color: #999999;
 }
 
-.sidebar-nav div i:hover {
+.sidebar-nav div i:hover,.sidebar-nav div a:hover {
     text-decoration: none;
     color: #fff;
     cursor:pointer;
@@ -87,7 +91,9 @@
 }
 
 .sidebar-nav div i:active,
-.sidebar-nav div i:focus {
+.sidebar-nav div i:focus,
+.sidebar-nav div a:active,
+.sidebar-nav div a:focus{
     text-decoration: none;
 }
 

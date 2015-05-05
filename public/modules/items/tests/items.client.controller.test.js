@@ -1,6 +1,7 @@
 'use strict';
 
 (function() {
+    
 	// Items Controller Spec
 	describe('Items Controller Tests', function() {
 		// Initialize global variables
@@ -35,21 +36,110 @@
 		// The injector ignores leading and trailing underscores here (i.e. _$httpBackend_).
 		// This allows us to inject a service but then attach it to a variable
 		// with the same name as the service.
-		beforeEach(inject(function($controller, $rootScope, _$location_, _$stateParams_, _$httpBackend_) {
+		beforeEach(inject(function($controller, $rootScope, _$location_, _$stateParams_, _$httpBackend_,_Socket_,_Authentication_) {
 			// Set a new global scope
 			scope = $rootScope.$new();
-
+		    
 			// Point global variables to injected services
 			$stateParams = _$stateParams_;
 			$httpBackend = _$httpBackend_;
 			$location = _$location_;
-
+	
 			// Initialize the Items controller.
 			ItemsController = $controller('ItemsController', {
 				$scope: scope
 			});
 		}));
+		
+        it('checkIfUserExists() should redirect to signin page without valid user', function() {
+			scope.authentication.user = ''
+            scope.checkIfUserExists();
+			expect($location.url()).toBe('/signin');
+		});
+		
+		 it('checkIfUserExists should remain on items page if user exists', function() {
+			// Test expected GET request
+			
+		    scope.authentication.user = 'Fred'
+            scope.checkIfUserExists();
 
+			expect($location.url()).toBe('/items');
+		});
+		
+        describe('Socket Implementation', function() {
+            
+         
+            
+            it('scope.appendItem(item) should add the passed in item to scope.items', inject(function(Items) {
+            
+				var old_item = new Items({
+                    _id: '525cf20451979dea2c000001',
+                    name: 'New Item'
+                });	
+                
+                var updated_item = new Items({ 
+                    _id : '525cf20451979dea2c000001',
+                    name : 'New Item', 
+                    } );	
+
+                var items = [updated_item];
+
+                scope.appendItem(old_item);
+                
+                expect(scope.items.length).toEqual(items.length);
+			
+		    }));
+		  
+		    
+		    
+		     it('scope.deleteItem(item) should remove the passed in item from scope.items', inject(function(Items) {
+                
+				var item = new Items({
+                    _id: '525cf20451979dea2c000001',
+                    name: 'New Item'
+                });	
+              
+
+                scope.items = [item];
+
+                scope.deleteItem(item);
+                
+                expect(scope.items).toEqual([]);
+			
+		    }));
+		    
+		    it('scope.updateItem(item) should set the associated scope item to the passed in item', inject(function(Items) {
+                
+				var old_item = new Items({
+                    _id: '525cf20451979dea2c000001',
+                    name: 'New Item',
+                    inCart: false,
+                    favorite:false,
+                    bought:false
+                });	
+                
+                var new_item = new Items({
+                    _id: '525cf20451979dea2c000001',
+                    name: 'New Item',
+                    inCart: true,
+                    favorite:true,
+                    bought:false
+                });	
+                
+              
+
+                scope.items = [old_item];
+
+                scope.updateItem(new_item);
+                
+                expect(scope.items[0].name).toEqual(new_item.name);
+                expect(scope.items[0].inCart).toEqual(new_item.inCart);
+                expect(scope.items[0].favorite).toEqual(new_item.favorite);
+                expect(scope.items[0].bought).toEqual(new_item.bought);
+			
+		    }));
+            
+        });
 		it('$scope.find() should create an array with at least one Item object fetched from XHR', inject(function(Items) {
 			// Create sample Item using the Items service
 			var sampleItem = new Items({
@@ -249,4 +339,27 @@
 		
 		
 	});
+	
+
+
+	
 }());
+
+//io mock
+
+var io = {
+  on: function(){},
+  connect:function(){
+      return new Socket();
+
+  }
+};
+
+//Socket Mock
+
+
+function Socket(){
+  this.on = function(event,callBack){
+      callBack();
+  };
+};

@@ -7,11 +7,14 @@ var mongoose = require('mongoose'),
 	errorHandler = require('./errors.server.controller'),
 	Item = mongoose.model('Item'),
 	_ = require('lodash');
+	
 
 /**
  * Create a Item
  */
 exports.create = function(req, res) {
+    
+  
 	var item = new Item(req.body);
 	item.user = req.user;
 
@@ -21,6 +24,10 @@ exports.create = function(req, res) {
 				message: errorHandler.getErrorMessage(err)
 			});
 		} else {
+	
+            var socketio = req.app.get('socketio'); // tacke out socket instance from the app container
+            socketio.sockets.emit('item.created', item); // emit an event for all connected clients
+    
 			res.jsonp(item);
 		}
 	});
@@ -47,6 +54,9 @@ exports.update = function(req, res) {
 				message: errorHandler.getErrorMessage(err)
 			});
 		} else {
+		    
+		    var socketio = req.app.get('socketio'); // tacke out socket instance from the app container
+            socketio.sockets.emit('item.updated', item); // emit an event for all connected clients
 			res.jsonp(item);
 		}
 	});

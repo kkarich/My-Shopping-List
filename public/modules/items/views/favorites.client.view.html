@@ -5,16 +5,21 @@
     </div>
         
     <div class="modal-body">
-         <div data-ng-repeat="item in favorites" class="list-group-item">
-                <i ng-class="item.addToList? ' fa fa-check-square-o fa-2x' : 'fa fa-square-o fa-2x'"
-                            ng-click="checkAddToList(item)" ></i>
-                <h4 class="list-group-item-heading" data-ng-bind="item.name"></h4>
+         <div data-ng-repeat="item in favorites" class="list-group-item row">
+                <i class = "col-xs-1" ng-class="item.addToList? ' fa fa-check-square-o fa-2x' : 'fa fa-square-o fa-2x'" ng-click="checkAddToList(item)" ></i>
+                <h4 class="col-xs-11 list-group-item-heading" data-ng-bind="item.name"></h4>
                         			
+        </div>
+        <div ng-hide="favorites.length">
+        
+         <h4 >No favorites Yet!</h4>
+   
+            
         </div>
    </div>
    
     <div class="modal-footer">
-        <button type = "submit" class="btn btn-primary">Add!</button>
+        <button ng-show="favorites.length" type = "submit" class="btn btn-primary">Add!</button>
             
         <button type = "button" class="btn btn-warning" ng-click="cancel()">Cancel</button>
        

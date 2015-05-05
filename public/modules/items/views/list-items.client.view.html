@@ -11,8 +11,7 @@
         <!-- Page Content -->
         <div id="page-content-wrapper">
          <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-12">
+           
                         <section  data-ng-controller="ItemsController" data-ng-init="find()">
                         
                             <form ng-submit = "create(name)">
@@ -20,30 +19,40 @@
                                     <input ng-model = "name" type="text" class="form-control" placeholder="Search for...">
                                     <span class="input-group-btn">
                                         <button  type = "submit" class="btn btn-default">Add!</button>
+                                        <button ng-click = "clearCart()" type="button" class="btn btn-default">Clear Cart</button>
                                     </span>
                                 </div>
                             </form>
                             
                             <div class="list-group">
-                                <div data-ng-repeat="item in items" class="list-group-item">
-                                    <i ng-class="item.inCart? ' fa fa-check-square-o fa-2x' : 'fa fa-square-o fa-2x'"
-                                                ng-click="addToCart(item)" ></i>
-                        			<h4 class="list-group-item-heading" data-ng-bind="item.name"></h4>
-                        			<i ng-class="item.favorite? ' fa fa-heart fa-2x' : 'fa fa-heart-o fa-2x'"
-                                                ng-click="favorite(item)" ></i>
+                                <div data-ng-repeat="item in list = (items | filter:{bought:'False'} | orderBy : 'inCart')" class="list-group-item">
+                                <div class="row">
+                                    <div class="col-xs-1">
+                                        <i ng-class="item.inCart? ' fa fa-check-square-o fa-2x' : 'fa fa-square-o fa-2x'" ng-click="addToCart(item)" ></i>
+                                    </div>
+                                    
+                                    <div class="col-xs-10">
+                                        <h4 class="list-group-item-heading" data-ng-bind="item.name"></h4>
+                                    </div>
+                                    
+                                    <div class="col-xs-1">
+                                    	<i ng-class="item.favorite? ' fa fa-heart fa-2x' : 'fa fa-heart-o fa-2x'" ng-click="favorite(item)" ></i>
+                                    </div>
                                 </div>
+                                
+                               
                             </div>
-                            <div class="alert alert-warning text-center" data-ng-hide="!items.$resolved || items.length">
-                            	No Items yet, why don't you <a href="/#!/items/create">create one</a>?
+                            <div ng-hide = "!items.$resolved || list.length"  class="list-group-item">
+                                      <h4 class="list-group-item-heading">Whoops! looks like there is nothing in your cart</h4>
                             </div>
+                        </div>
+                            
                             
                             
                         </section>
                                                
                     </div>
-                </div>
-            </div>
-        
+            
 
 
            
