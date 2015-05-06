@@ -1,9 +1,17 @@
 
  
- <div class="row sidebar-nav" ng-controller="SideNavController">
-  <div class="col-md-12"><p class="text-center"><i ng-click = "openProfile()" class="fa fa-user fa-4x"></i></p></div>
-  <div class="col-md-12"><p class="text-center"><i ng-click = "openFavorites()" class="fa fa-heart fa-4x"></i></p></div>
-  <div class="col-md-12"><p class="text-center"><i ng-click = "openRecipe()" class="fa fa-cutlery fa-4x"></i></p></div>
-  <div class="col-md-12"><p class="text-center">	<a href="/auth/signout">Signout</a></p></div>
+ <div class="row sidebar-nav" ng-controller="SideNavController" >
+    <section id = "side-nav-menu" ng-show = "open"> 
+      <div class="col-md-12"><p class="text-center"><i ng-click = "openProfile()" class="fa fa-user fa-4x"></i></p></div>
+      <div class="col-md-12"><p class="text-center"><i ng-click = "openFavorites()" class="fa fa-heart fa-4x"></i></p></div>
+      <div class="col-md-12"><p class="text-center"><i ng-click = "openRecipe()" class="fa fa-cutlery fa-4x"></i></p></div>
+      <div class="col-md-12"><p class="text-center">	<a href="/auth/signout">Signout</a></p></div>
+    </section>
+    
+      <a ng-click = "toggle()"  id="menu-toggle">
+                  <i ng-hide = "open" class="fa fa-chevron-right"></i>
+                  <i ng-show = "open"  class="fa fa-times"></i>
+                  </a>
+    
 </div>
                

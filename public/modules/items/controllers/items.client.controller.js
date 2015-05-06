@@ -5,6 +5,8 @@ angular.module('items').controller('ItemsController', ['$scope', '$stateParams',
 	function($scope, $stateParams, $location, Authentication,$filter, Items,Socket) {
 		$scope.authentication = Authentication;
 		
+		
+		
 		$scope.checkIfUserExists = function(){
 		    if (!$scope.authentication.user) $location.path('/signin');
 		};
@@ -132,5 +134,8 @@ angular.module('items').controller('ItemsController', ['$scope', '$stateParams',
 			
 			
 		};
+		
+		
+		
 	}
 ]);

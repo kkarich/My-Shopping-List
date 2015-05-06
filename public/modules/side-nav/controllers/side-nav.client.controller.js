@@ -1,9 +1,17 @@
 'use strict';
 
-angular.module('side-nav').controller('SideNavController', ['$scope', '$modal',
-	function($scope,$modal) {
+angular.module('side-nav').controller('SideNavController', ['$scope', '$modal', '$window',
+	function($scope,$modal, $window) {
 		// Side nav controller logic
 		// ...
+	//init open based on screan size
+	if($window.innerWidth < 768) $scope.open = false;
+	else $scope.open = true;
+
+
+    $scope.toggle = function(){
+        $scope.open = !$scope.open;
+    };
 		
 	$scope.openProfile = function () {
 
