@@ -165,6 +165,14 @@ var io = socketio.listen(server);
 app.set('socketio', io);
 app.set('server', server);
 
+//When recieve join event from items controller add user id to room. (used for only sending data to correct users)
+io.on('connection', function (socket) {
+  console.log(socket.id);
+  socket.on('join',function(user){
+      socket.join(user);
+  });
+});
+
 	// Return Express server instance
 	return app;
 };

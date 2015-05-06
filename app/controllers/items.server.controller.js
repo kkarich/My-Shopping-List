@@ -26,7 +26,9 @@ exports.create = function(req, res) {
 		} else {
 	
             var socketio = req.app.get('socketio'); // tacke out socket instance from the app container
-            socketio.sockets.emit('item.created', item); // emit an event for all connected clients
+            
+            console.log(socketio.sockets.connected);
+            socketio.sockets.to(req.user._id).emit('item.created', item); // emit an event for all connected clients
     
 			res.jsonp(item);
 		}
@@ -56,7 +58,7 @@ exports.update = function(req, res) {
 		} else {
 		    
 		    var socketio = req.app.get('socketio'); // tacke out socket instance from the app container
-            socketio.sockets.emit('item.updated', item); // emit an event for all connected clients
+            socketio.sockets.to(req.user._id).emit('item.updated', item); // emit an event for all connected clients
 			res.jsonp(item);
 		}
 	});
@@ -89,6 +91,7 @@ exports.list = function(req, res) {
 				message: errorHandler.getErrorMessage(err)
 			});
 		} else {
+
 			res.jsonp(items);
 		}
 	});

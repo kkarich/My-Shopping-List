@@ -6,6 +6,9 @@ angular.module('items').controller('ItemsController', ['$scope', '$stateParams',
 		$scope.authentication = Authentication;
 		
 		
+		//Send join event to join a room
+		Socket.emit('join', $scope.authentication.user._id) ;
+         
 		
 		$scope.checkIfUserExists = function(){
 		    if (!$scope.authentication.user) $location.path('/signin');

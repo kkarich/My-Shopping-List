@@ -53,6 +53,21 @@
 				$modal:modal
 			});
 		}));
+		
+		it('toggle() should reverse scope.open', inject(function() {
+		    
+		  scope.open = false;
+		  
+		  scope.toggle();
+		  
+		  expect(scope.open).toBe(true);
+		  
+		  scope.toggle();
+		  
+		  expect(scope.open).toBe(false);
+			
+		}));
+		
 
 		it('openProfile() Should open user profile in modal', inject(function() {
 		    
