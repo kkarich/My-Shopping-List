@@ -7,7 +7,7 @@ module.exports = {
 			css: [
 				'public/lib/bootstrap/dist/css/bootstrap.min.css',
 				'public/lib/flat-ui/dist/css/flat-ui.min.css',
-				'public/lib/font-awesome/css/font-awesome.min.css'
+				'public/lib/font-awesome/css/font-awesome.min.css',
 			],
 			js: [
 				'public/lib/angular/angular.min.js',
