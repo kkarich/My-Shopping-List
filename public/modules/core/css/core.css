@@ -65,10 +65,11 @@
   display:block;
   top: 0px;
   left: 150px;
-  background-color: #354251;
+  background-color: #302B2D;
   width: 50px;
   height: 50px;
   z-index:1000;
+  cursor:pointer;
 }
 
 #menu-toggle i{
@@ -90,14 +91,14 @@ color: #F2F2F2;
 }
 
 .sidebar-nav div {
-     padding-top: 25px;
-     padding-bottom: 25px;
+     padding-top: 33px;
+     padding-bottom: 33px;
 }
 
 .sidebar-nav div i,.sidebar-nav div a  {
     display: block;
     text-decoration: none;
-    color: #999999;
+    color: #302B2D;
 }
 
 .sidebar-nav div i:hover,.sidebar-nav div a:hover {
@@ -114,5 +115,38 @@ color: #F2F2F2;
     text-decoration: none;
 }
 
+#side-nav-menu{
+    background-color:#1ABC9C;
+}
+
+#side-nav-menu div:nth-child(1){
+    background-color:#3498DB;
+}
+
+#side-nav-menu div:nth-child(2){
+    background-color:#F26C68;
+}
+
+#side-nav-menu div:nth-child(3){
+    background-color:#F4D313;
+}
+
+.fa-check-square-o,.fa-square-o{
+    color:#3498DB;
+}
+
+.fa-heart, .fa-heart-o{
+    color:#F26C68
+}
+
+.input-group .input-group-btn button:nth-child(1),.input-group-btn button:nth-child(1):hover {
+   background-color:#1ABC9C;
+   border-color:#1ABC9C;
+}
+.input-group .input-group-btn button:nth-child(2),.input-group-btn button:nth-child(2):hover{
+   background-color:#3498DB;
+   border-color:#3498DB;
+  
+}
 
 

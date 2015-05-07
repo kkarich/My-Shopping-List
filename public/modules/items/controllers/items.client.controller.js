@@ -5,13 +5,19 @@ angular.module('items').controller('ItemsController', ['$scope', '$stateParams',
 	function($scope, $stateParams, $location, Authentication,$filter, Items,Socket) {
 		$scope.authentication = Authentication;
 		
+        		
+		    	//Send join event to join a room
+	    Socket.emit('join', $scope.authentication.user._id) ;
 		
-		//Send join event to join a room
-		Socket.emit('join', $scope.authentication.user._id) ;
+		
+		
+	
+	
          
 		
 		$scope.checkIfUserExists = function(){
 		    if (!$scope.authentication.user) $location.path('/signin');
+		    else $location.path('/items');
 		};
 		
 		$scope.checkIfUserExists();
@@ -61,6 +67,8 @@ angular.module('items').controller('ItemsController', ['$scope', '$stateParams',
 
 		// Create new Item
 		$scope.create = function(name) {
+		    
+		    if(!name) return
 			// Create new Item object
 			var item = new Items ({
 				name: name

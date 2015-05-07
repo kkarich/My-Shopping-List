@@ -36,9 +36,12 @@
 		// The injector ignores leading and trailing underscores here (i.e. _$httpBackend_).
 		// This allows us to inject a service but then attach it to a variable
 		// with the same name as the service.
-		beforeEach(inject(function($controller, $rootScope, _$location_, _$stateParams_, _$httpBackend_,_Socket_,_Authentication_) {
+		beforeEach(inject(function($controller, $rootScope, _$location_, _$stateParams_, _$httpBackend_,_Socket_) {
 			// Set a new global scope
 			scope = $rootScope.$new();
+			
+			var authentication = {user: {_id:'123123123'}};
+		
 		    
 			// Point global variables to injected services
 			$stateParams = _$stateParams_;
@@ -47,9 +50,14 @@
 	
 			// Initialize the Items controller.
 			ItemsController = $controller('ItemsController', {
-				$scope: scope
+				$scope: scope,
+				Authentication:authentication
 			});
 		}));
+		
+		it('should expose the authentication service', function() {
+			expect(scope.authentication).toBeTruthy();
+		});
 		
         it('checkIfUserExists() should redirect to signin page without valid user', function() {
 			scope.authentication.user = ''
@@ -208,6 +216,19 @@
 			// Test URL redirection after the Item was created
 			//expect($location.path()).toBe('/items/' + sampleItemResponse._id);
 		}));
+		
+		it('$scope.create() withoutut name should not post', inject(function(Items) {
+			// Create a sample Item object
+			var sampleItemPostData = new Items({
+				name: ''
+			});
+
+			// Run controller functionality
+			scope.create(sampleItemPostData.name);
+			
+
+			
+		}));
 
 		it('$scope.update() should update a valid Item', inject(function(Items) {
 			// Define a sample Item put data
@@ -345,21 +366,54 @@
 	
 }());
 
-//io mock
-
-var io = {
-  on: function(){},
-  connect:function(){
-      return new Socket();
-
-  }
-};
 
 //Socket Mock
-
-
-function Socket(){
-  this.on = function(event,callBack){
-      callBack();
-  };
+var io = {
+  connect: createMockSocketObject
 };
+
+function createMockSocketObject () {
+
+  var socket = {
+    on: function (ev, fn) {
+      (this._listeners[ev] = this._listeners[ev] || []).push(fn);
+    },
+    once: function (ev, fn) {
+      (this._listeners[ev] = this._listeners[ev] || []).push(fn);
+      fn._once = true;
+    },
+    emit: function (ev, data) {
+      if (this._listeners[ev]) {
+        var args = arguments;
+        this._listeners[ev].forEach(function (listener) {
+          if (listener._once) {
+            this.removeListener(ev, listener);
+          }
+          listener.apply(null, Array.prototype.slice.call(args, 1));
+        }.bind(this));
+      }
+    },
+    _listeners: {},
+    removeListener: function (ev, fn) {
+      if (fn) {
+        var index = this._listeners[ev].indexOf(fn);
+        if (index > -1) {
+          this._listeners[ev].splice(index, 1);
+        }
+      } else {
+        delete this._listeners[ev];
+      }
+    },
+    removeAllListeners: function (ev) {
+      if (ev) {
+        delete this._listeners[ev];
+      } else {
+        this._listeners = {};
+      }
+    },
+    disconnect: function () {},
+    connect: function () {}
+  };
+
+  return socket;
+}

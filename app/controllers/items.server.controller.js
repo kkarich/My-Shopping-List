@@ -20,6 +20,7 @@ exports.create = function(req, res) {
 
 	item.save(function(err) {
 		if (err) {
+		    console.log('create error')
 			return res.status(400).send({
 				message: errorHandler.getErrorMessage(err)
 			});
@@ -85,7 +86,7 @@ exports.delete = function(req, res) {
  * List of Items
  */
 exports.list = function(req, res) { 
-	Item.find().sort('-created').populate('user', 'displayName').exec(function(err, items) {
+	Item.find({user:req.user._id}).sort('-created').populate('user', 'displayName').exec(function(err, items) {
 		if (err) {
 			return res.status(400).send({
 				message: errorHandler.getErrorMessage(err)
@@ -98,7 +99,7 @@ exports.list = function(req, res) {
 };
 
 exports.favorites = function(req, res) { 
-	Item.find({favorite:true}).sort('-created').populate('user', 'displayName').exec(function(err, items) {
+	Item.find({favorite:true,user:req.user._id}).sort('-created').populate('user', 'displayName').exec(function(err, items) {
 		if (err) {
 			return res.status(400).send({
 				message: errorHandler.getErrorMessage(err)

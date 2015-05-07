@@ -5,8 +5,8 @@ angular.module('side-nav').controller('SideNavController', ['$scope', '$modal', 
 		// Side nav controller logic
 		// ...
 	//init open based on screan size
-	if($window.innerWidth < 768) $scope.open = false;
-	else $scope.open = true;
+    $scope.open = false;
+
 
 
     $scope.toggle = function(){
