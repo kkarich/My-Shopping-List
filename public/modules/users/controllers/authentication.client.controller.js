@@ -3,7 +3,7 @@
 angular.module('users').controller('AuthenticationController', ['$scope', '$http', '$location', 'Authentication',
 	function($scope, $http, $location, Authentication) {
 		$scope.authentication = Authentication;
-
+        $scope.credentials = {username:'tryout',password:'tryout2'}
 		// If user is signed in then redirect back to the items page 
 		if ($scope.authentication.user) $location.path('/items');
 

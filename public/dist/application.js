@@ -1,1 +1,874 @@
-"use strict";var ApplicationConfiguration=function(){var applicationModuleName="shopping-list",applicationModuleVendorDependencies=["ngResource","ngCookies","ngAnimate","ngTouch","ngSanitize","ui.router","ui.bootstrap","ui.utils","btford.socket-io"],registerModule=function(moduleName,dependencies){angular.module(moduleName,dependencies||[]),angular.module(applicationModuleName).requires.push(moduleName)};return{applicationModuleName:applicationModuleName,applicationModuleVendorDependencies:applicationModuleVendorDependencies,registerModule:registerModule}}();angular.module(ApplicationConfiguration.applicationModuleName,ApplicationConfiguration.applicationModuleVendorDependencies),angular.module(ApplicationConfiguration.applicationModuleName).config(["$locationProvider",function($locationProvider){$locationProvider.hashPrefix("!")}]),angular.element(document).ready(function(){"#_=_"===window.location.hash&&(window.location.hash="#!"),angular.bootstrap(document,[ApplicationConfiguration.applicationModuleName])}),ApplicationConfiguration.registerModule("core"),ApplicationConfiguration.registerModule("items"),ApplicationConfiguration.registerModule("recipe"),ApplicationConfiguration.registerModule("side-nav"),ApplicationConfiguration.registerModule("users"),angular.module("core").config(["$stateProvider","$urlRouterProvider",function($stateProvider,$urlRouterProvider){$urlRouterProvider.otherwise("/items")}]),angular.module("core").controller("HeaderController",["$scope","Authentication","Menus",function($scope,Authentication,Menus){$scope.authentication=Authentication,$scope.isCollapsed=!1,$scope.menu=Menus.getMenu("topbar"),$scope.toggleCollapsibleMenu=function(){$scope.isCollapsed=!$scope.isCollapsed},$scope.$on("$stateChangeSuccess",function(){$scope.isCollapsed=!1})}]),angular.module("core").controller("HomeController",["$scope","Authentication",function($scope,Authentication){$scope.authentication=Authentication}]),angular.module("core").service("Menus",[function(){this.defaultRoles=["*"],this.menus={};var shouldRender=function(user){if(!user)return this.isPublic;if(~this.roles.indexOf("*"))return!0;for(var userRoleIndex in user.roles)for(var roleIndex in this.roles)if(this.roles[roleIndex]===user.roles[userRoleIndex])return!0;return!1};this.validateMenuExistance=function(menuId){if(menuId&&menuId.length){if(this.menus[menuId])return!0;throw new Error("Menu does not exists")}throw new Error("MenuId was not provided")},this.getMenu=function(menuId){return this.validateMenuExistance(menuId),this.menus[menuId]},this.addMenu=function(menuId,isPublic,roles){return this.menus[menuId]={isPublic:isPublic||!1,roles:roles||this.defaultRoles,items:[],shouldRender:shouldRender},this.menus[menuId]},this.removeMenu=function(menuId){this.validateMenuExistance(menuId),delete this.menus[menuId]},this.addMenuItem=function(menuId,menuItemTitle,menuItemURL,menuItemType,menuItemUIRoute,isPublic,roles,position){return this.validateMenuExistance(menuId),this.menus[menuId].items.push({title:menuItemTitle,link:menuItemURL,menuItemType:menuItemType||"item",menuItemClass:menuItemType,uiRoute:menuItemUIRoute||"/"+menuItemURL,isPublic:null===isPublic||"undefined"==typeof isPublic?this.menus[menuId].isPublic:isPublic,roles:null===roles||"undefined"==typeof roles?this.menus[menuId].roles:roles,position:position||0,items:[],shouldRender:shouldRender}),this.menus[menuId]},this.addSubMenuItem=function(menuId,rootMenuItemURL,menuItemTitle,menuItemURL,menuItemUIRoute,isPublic,roles,position){this.validateMenuExistance(menuId);for(var itemIndex in this.menus[menuId].items)this.menus[menuId].items[itemIndex].link===rootMenuItemURL&&this.menus[menuId].items[itemIndex].items.push({title:menuItemTitle,link:menuItemURL,uiRoute:menuItemUIRoute||"/"+menuItemURL,isPublic:null===isPublic||"undefined"==typeof isPublic?this.menus[menuId].items[itemIndex].isPublic:isPublic,roles:null===roles||"undefined"==typeof roles?this.menus[menuId].items[itemIndex].roles:roles,position:position||0,shouldRender:shouldRender});return this.menus[menuId]},this.removeMenuItem=function(menuId,menuItemURL){this.validateMenuExistance(menuId);for(var itemIndex in this.menus[menuId].items)this.menus[menuId].items[itemIndex].link===menuItemURL&&this.menus[menuId].items.splice(itemIndex,1);return this.menus[menuId]},this.removeSubMenuItem=function(menuId,submenuItemURL){this.validateMenuExistance(menuId);for(var itemIndex in this.menus[menuId].items)for(var subitemIndex in this.menus[menuId].items[itemIndex].items)this.menus[menuId].items[itemIndex].items[subitemIndex].link===submenuItemURL&&this.menus[menuId].items[itemIndex].items.splice(subitemIndex,1);return this.menus[menuId]},this.addMenu("topbar")}]),angular.module("core").factory("Socket",["socketFactory",function(socketFactory){return socketFactory({prefix:"",ioSocket:io.connect("http://my-shopping-list2.herokuapp.com")})}]),angular.module("socketMock",[]).factory("socket",function(){return{socket:{connect:function(){},on:function(){},emit:function(){},receive:function(){}},syncUpdates:function(){},unsyncUpdates:function(){}}}),angular.module("items").config(["$stateProvider",function($stateProvider){$stateProvider.state("listItems",{url:"/items",templateUrl:"modules/items/views/list-items.client.view.html"})}]),angular.module("items").controller("FavoritesController",["$scope","$modalInstance","Items",function($scope,$modalInstance,Items){$scope.find=function(){$scope.favorites=Items.favorites(),console.log($scope.favorites),$scope.favorites.$promise.then(function(result){$scope.favorites=result;for(var i=0;i<$scope.favorites.length;i++)$scope.favorites[i].addToList=!0,console.log($scope.favorites)})},$scope.addToList=function(){for(var i in $scope.favorites){var item=$scope.favorites[i];item.addToList&&(item.bought=!1,item.inCart=!1,item.$update(function(){},function(errorResponse){$scope.error=errorResponse.data.message}))}$modalInstance.close()},$scope.checkAddToList=function(item){item.addToList=!item.addToList},$scope.cancel=function(){$modalInstance.dismiss("cancel")}}]),angular.module("items").controller("ItemsController",["$scope","$stateParams","$location","Authentication","$filter","Items","Socket",function($scope,$stateParams,$location,Authentication,$filter,Items,Socket){$scope.authentication=Authentication,Socket.emit("join",$scope.authentication.user._id),$scope.checkIfUserExists=function(){$location.path($scope.authentication.user?"/items":"/signin")},$scope.checkIfUserExists(),$scope.items=[],$scope.appendItem=function(item){var resource=new Items,updated_item=angular.copy(item,resource);console.log(updated_item),$scope.items.push(updated_item)},$scope.updateItem=function(item){var resource=new Items;console.log(resource);var oldItem=$filter("filter")($scope.items,{_id:item._id})[0],index=$scope.items.indexOf(oldItem);$scope.items[index]=angular.copy(item,resource),console.log($scope.items[index])},$scope.deleteItem=function(item){var index=$scope.items.indexOf(item);$scope.items.splice(index,1)},Socket.on("item.created",function(item){$scope.appendItem(item)}),Socket.on("item.updated",function(item){$scope.updateItem(item)}),$scope.create=function(name){if(name){var item=new Items({name:name});item.$save(function(response){$scope.name=""},function(errorResponse){$scope.error=errorResponse.data.message})}},$scope.remove=function(item){if(item){item.$remove();for(var i in $scope.items)$scope.items[i]===item&&$scope.items.splice(i,1)}else $scope.item.$remove(function(){$location.path("items")})},$scope.update=function(item){item.$update()},$scope.find=function(){$scope.items=Items.query()},$scope.findOne=function(){$scope.item=Items.get({itemId:$stateParams.itemId})},$scope.favorite=function(item){item.favorite=!item.favorite,$scope.update(item)},$scope.addToCart=function(item){item.inCart=!item.inCart,$scope.update(item)},$scope.clearCart=function(){console.log("test");var itemsInCart=$filter("filter")($scope.items,{inCart:!0,bought:!1});for(var i in itemsInCart)itemsInCart[i].bought=!0,$scope.update(itemsInCart[i]),console.log("bought",itemsInCart[i])}}]),angular.module("items").factory("Items",["$resource",function($resource){return $resource("items/:itemId",{itemId:"@_id"},{update:{method:"PUT"},favorites:{url:"favorites",method:"GET",isArray:!0}})}]),angular.module("recipe").controller("RecipeController",["$scope","Items","$modalInstance",function($scope,Items,$modalInstance){$scope.convertRecipe=function(){var items=[];$scope.recipe&&(items=$scope.recipe.split("\n"));for(var i in items){var item=new Items({name:items[i].trim()});item.$save(function(response){},function(errorResponse){$scope.error=errorResponse.data.message}),$scope.recipe=""}$modalInstance.close()},$scope.cancel=function(){$modalInstance.dismiss("cancel")}}]),angular.module("side-nav").controller("SideNavController",["$scope","$modal","$window",function($scope,$modal,$window){$scope.open=!1,$scope.toggle=function(){$scope.open=!$scope.open},$scope.openProfile=function(){$modal.open({templateUrl:"/modules/users/views/settings/edit-profile.client.view.html",controller:"SettingsController"})},$scope.openRecipe=function(){$modal.open({templateUrl:"/modules/recipe/views/recipe.client.view.html",controller:"RecipeController"})},$scope.openFavorites=function(){$modal.open({templateUrl:"/modules/items/views/favorites.client.view.html",controller:"FavoritesController"})}}]),angular.module("users").config(["$httpProvider",function($httpProvider){$httpProvider.interceptors.push(["$q","$location","Authentication",function($q,$location,Authentication){return{responseError:function(rejection){switch(rejection.status){case 401:Authentication.user=null,$location.path("signin");break;case 403:}return $q.reject(rejection)}}}])}]),angular.module("users").config(["$stateProvider",function($stateProvider){$stateProvider.state("profile",{url:"/settings/profile",templateUrl:"modules/users/views/settings/edit-profile.client.view.html"}).state("password",{url:"/settings/password",templateUrl:"modules/users/views/settings/change-password.client.view.html"}).state("accounts",{url:"/settings/accounts",templateUrl:"modules/users/views/settings/social-accounts.client.view.html"}).state("signup",{url:"/signup",templateUrl:"modules/users/views/authentication/signup.client.view.html"}).state("signin",{url:"/signin",templateUrl:"modules/users/views/authentication/signin.client.view.html"}).state("forgot",{url:"/password/forgot",templateUrl:"modules/users/views/password/forgot-password.client.view.html"}).state("reset-invalid",{url:"/password/reset/invalid",templateUrl:"modules/users/views/password/reset-password-invalid.client.view.html"}).state("reset-success",{url:"/password/reset/success",templateUrl:"modules/users/views/password/reset-password-success.client.view.html"}).state("reset",{url:"/password/reset/:token",templateUrl:"modules/users/views/password/reset-password.client.view.html"})}]),angular.module("users").controller("AuthenticationController",["$scope","$http","$location","Authentication",function($scope,$http,$location,Authentication){$scope.authentication=Authentication,$scope.authentication.user&&$location.path("/items"),$scope.signup=function(){$http.post("/auth/signup",$scope.credentials).success(function(response){$scope.authentication.user=response,$location.path("/items")}).error(function(response){$scope.error=response.message})},$scope.signin=function(){$http.post("/auth/signin",$scope.credentials).success(function(response){$scope.authentication.user=response,$location.path("/items")}).error(function(response){$scope.error=response.message})}}]),angular.module("users").controller("PasswordController",["$scope","$stateParams","$http","$location","Authentication",function($scope,$stateParams,$http,$location,Authentication){$scope.authentication=Authentication,$scope.authentication.user&&$location.path("/"),$scope.askForPasswordReset=function(){$scope.success=$scope.error=null,$http.post("/auth/forgot",$scope.credentials).success(function(response){$scope.credentials=null,$scope.success=response.message}).error(function(response){$scope.credentials=null,$scope.error=response.message})},$scope.resetUserPassword=function(){$scope.success=$scope.error=null,$http.post("/auth/reset/"+$stateParams.token,$scope.passwordDetails).success(function(response){$scope.passwordDetails=null,Authentication.user=response,$location.path("/password/reset/success")}).error(function(response){$scope.error=response.message})}}]),angular.module("users").controller("SettingsController",["$scope","$http","$location","Users","Authentication","$modalInstance",function($scope,$http,$location,Users,Authentication,$modalInstance){$scope.user=Authentication.user,$scope.user||$location.path("/"),$scope.hasConnectedAdditionalSocialAccounts=function(provider){for(var i in $scope.user.additionalProvidersData)return!0;return!1},$scope.isConnectedSocialAccount=function(provider){return $scope.user.provider===provider||$scope.user.additionalProvidersData&&$scope.user.additionalProvidersData[provider]},$scope.removeUserSocialAccount=function(provider){$scope.success=$scope.error=null,$http["delete"]("/users/accounts",{params:{provider:provider}}).success(function(response){$scope.success=!0,$scope.user=Authentication.user=response}).error(function(response){$scope.error=response.message})},$scope.updateUserProfile=function(isValid){if(isValid){$scope.success=$scope.error=null;var user=new Users($scope.user);user.$update(function(response){$scope.success=!0,Authentication.user=response},function(response){$scope.error=response.data.message})}else $scope.submitted=!0},$scope.changeUserPassword=function(){$scope.success=$scope.error=null,$http.post("/users/password",$scope.passwordDetails).success(function(response){$scope.success=!0,$scope.passwordDetails=null}).error(function(response){$scope.error=response.message})},$scope.cancel=function(){$modalInstance.dismiss("cancel")}}]),angular.module("users").factory("Authentication",[function(){var _this=this;return _this._data={user:window.user},_this._data}]),angular.module("users").factory("Users",["$resource",function($resource){return $resource("users",{},{update:{method:"PUT"}})}]);
+'use strict';
+
+// Init the application configuration module for AngularJS application
+var ApplicationConfiguration = (function() {
+	// Init module configuration options
+	var applicationModuleName = 'shopping-list';
+	var applicationModuleVendorDependencies = ['ngResource', 'ngCookies',  'ngAnimate',  'ngTouch',  'ngSanitize',  'ui.router', 'ui.bootstrap', 'ui.utils','btford.socket-io'];
+
+	// Add a new vertical module
+	var registerModule = function(moduleName, dependencies) {
+		// Create angular module
+		angular.module(moduleName, dependencies || []);
+
+		// Add the module to the AngularJS configuration file
+		angular.module(applicationModuleName).requires.push(moduleName);
+	};
+
+	return {
+		applicationModuleName: applicationModuleName,
+		applicationModuleVendorDependencies: applicationModuleVendorDependencies,
+		registerModule: registerModule
+	};
+})();
+'use strict';
+
+//Start by defining the main module and adding the module dependencies
+angular.module(ApplicationConfiguration.applicationModuleName, ApplicationConfiguration.applicationModuleVendorDependencies);
+
+// Setting HTML5 Location Mode
+angular.module(ApplicationConfiguration.applicationModuleName).config(['$locationProvider',
+	function($locationProvider) {
+		$locationProvider.hashPrefix('!');
+	}
+]);
+
+//Then define the init function for starting up the application
+angular.element(document).ready(function() {
+	//Fixing facebook bug with redirect
+	if (window.location.hash === '#_=_') window.location.hash = '#!';
+
+	//Then init the app
+	angular.bootstrap(document, [ApplicationConfiguration.applicationModuleName]);
+});
+'use strict';
+
+// Use Applicaion configuration module to register a new module
+ApplicationConfiguration.registerModule('core');
+'use strict';
+
+// Use applicaion configuration module to register a new module
+ApplicationConfiguration.registerModule('items');
+'use strict';
+
+// Use application configuration module to register a new module
+ApplicationConfiguration.registerModule('recipe');
+
+'use strict';
+
+// Use application configuration module to register a new module
+ApplicationConfiguration.registerModule('side-nav');
+
+'use strict';
+
+// Use Applicaion configuration module to register a new module
+ApplicationConfiguration.registerModule('users');
+'use strict';
+
+// Setting up route
+angular.module('core').config(['$stateProvider', '$urlRouterProvider',
+	function($stateProvider, $urlRouterProvider) {
+		// Redirect to home view when route not found
+		$urlRouterProvider.otherwise('/items');
+
+		// Home state routing
+	
+	}
+]);
+'use strict';
+
+angular.module('core').controller('HeaderController', ['$scope', 'Authentication', 'Menus',
+	function($scope, Authentication, Menus) {
+		$scope.authentication = Authentication;
+		$scope.isCollapsed = false;
+		$scope.menu = Menus.getMenu('topbar');
+
+		$scope.toggleCollapsibleMenu = function() {
+			$scope.isCollapsed = !$scope.isCollapsed;
+		};
+
+		// Collapsing the menu after navigation
+		$scope.$on('$stateChangeSuccess', function() {
+			$scope.isCollapsed = false;
+		});
+	}
+]);
+'use strict';
+
+
+angular.module('core').controller('HomeController', ['$scope', 'Authentication',
+	function($scope, Authentication) {
+		// This provides Authentication context.
+		$scope.authentication = Authentication;
+	}
+]);
+'use strict';
+
+//Menu service used for managing  menus
+angular.module('core').service('Menus', [
+
+	function() {
+		// Define a set of default roles
+		this.defaultRoles = ['*'];
+
+		// Define the menus object
+		this.menus = {};
+
+		// A private function for rendering decision 
+		var shouldRender = function(user) {
+			if (user) {
+				if (!!~this.roles.indexOf('*')) {
+					return true;
+				} else {
+					for (var userRoleIndex in user.roles) {
+						for (var roleIndex in this.roles) {
+							if (this.roles[roleIndex] === user.roles[userRoleIndex]) {
+								return true;
+							}
+						}
+					}
+				}
+			} else {
+				return this.isPublic;
+			}
+
+			return false;
+		};
+
+		// Validate menu existance
+		this.validateMenuExistance = function(menuId) {
+			if (menuId && menuId.length) {
+				if (this.menus[menuId]) {
+					return true;
+				} else {
+					throw new Error('Menu does not exists');
+				}
+			} else {
+				throw new Error('MenuId was not provided');
+			}
+
+			return false;
+		};
+
+		// Get the menu object by menu id
+		this.getMenu = function(menuId) {
+			// Validate that the menu exists
+			this.validateMenuExistance(menuId);
+
+			// Return the menu object
+			return this.menus[menuId];
+		};
+
+		// Add new menu object by menu id
+		this.addMenu = function(menuId, isPublic, roles) {
+			// Create the new menu
+			this.menus[menuId] = {
+				isPublic: isPublic || false,
+				roles: roles || this.defaultRoles,
+				items: [],
+				shouldRender: shouldRender
+			};
+
+			// Return the menu object
+			return this.menus[menuId];
+		};
+
+		// Remove existing menu object by menu id
+		this.removeMenu = function(menuId) {
+			// Validate that the menu exists
+			this.validateMenuExistance(menuId);
+
+			// Return the menu object
+			delete this.menus[menuId];
+		};
+
+		// Add menu item object
+		this.addMenuItem = function(menuId, menuItemTitle, menuItemURL, menuItemType, menuItemUIRoute, isPublic, roles, position) {
+			// Validate that the menu exists
+			this.validateMenuExistance(menuId);
+
+			// Push new menu item
+			this.menus[menuId].items.push({
+				title: menuItemTitle,
+				link: menuItemURL,
+				menuItemType: menuItemType || 'item',
+				menuItemClass: menuItemType,
+				uiRoute: menuItemUIRoute || ('/' + menuItemURL),
+				isPublic: ((isPublic === null || typeof isPublic === 'undefined') ? this.menus[menuId].isPublic : isPublic),
+				roles: ((roles === null || typeof roles === 'undefined') ? this.menus[menuId].roles : roles),
+				position: position || 0,
+				items: [],
+				shouldRender: shouldRender
+			});
+
+			// Return the menu object
+			return this.menus[menuId];
+		};
+
+		// Add submenu item object
+		this.addSubMenuItem = function(menuId, rootMenuItemURL, menuItemTitle, menuItemURL, menuItemUIRoute, isPublic, roles, position) {
+			// Validate that the menu exists
+			this.validateMenuExistance(menuId);
+
+			// Search for menu item
+			for (var itemIndex in this.menus[menuId].items) {
+				if (this.menus[menuId].items[itemIndex].link === rootMenuItemURL) {
+					// Push new submenu item
+					this.menus[menuId].items[itemIndex].items.push({
+						title: menuItemTitle,
+						link: menuItemURL,
+						uiRoute: menuItemUIRoute || ('/' + menuItemURL),
+						isPublic: ((isPublic === null || typeof isPublic === 'undefined') ? this.menus[menuId].items[itemIndex].isPublic : isPublic),
+						roles: ((roles === null || typeof roles === 'undefined') ? this.menus[menuId].items[itemIndex].roles : roles),
+						position: position || 0,
+						shouldRender: shouldRender
+					});
+				}
+			}
+
+			// Return the menu object
+			return this.menus[menuId];
+		};
+
+		// Remove existing menu object by menu id
+		this.removeMenuItem = function(menuId, menuItemURL) {
+			// Validate that the menu exists
+			this.validateMenuExistance(menuId);
+
+			// Search for menu item to remove
+			for (var itemIndex in this.menus[menuId].items) {
+				if (this.menus[menuId].items[itemIndex].link === menuItemURL) {
+					this.menus[menuId].items.splice(itemIndex, 1);
+				}
+			}
+
+			// Return the menu object
+			return this.menus[menuId];
+		};
+
+		// Remove existing menu object by menu id
+		this.removeSubMenuItem = function(menuId, submenuItemURL) {
+			// Validate that the menu exists
+			this.validateMenuExistance(menuId);
+
+			// Search for menu item to remove
+			for (var itemIndex in this.menus[menuId].items) {
+				for (var subitemIndex in this.menus[menuId].items[itemIndex].items) {
+					if (this.menus[menuId].items[itemIndex].items[subitemIndex].link === submenuItemURL) {
+						this.menus[menuId].items[itemIndex].items.splice(subitemIndex, 1);
+					}
+				}
+			}
+
+			// Return the menu object
+			return this.menus[menuId];
+		};
+
+		//Adding the topbar menu
+		this.addMenu('topbar');
+	}
+]);
+'use strict';
+
+//socket factory that provides the socket service
+angular.module('core').factory('Socket', ['socketFactory',
+    function(socketFactory) {
+        return socketFactory({
+            prefix: '',
+            ioSocket: io.connect('http://my-shopping-list2.herokuapp.com')
+        });
+    }
+]);
+'use strict';
+
+angular.module('socketMock', [])
+  .factory('socket', function() {
+    return {
+      socket: {
+        connect: function() {},
+        on: function() {},
+        emit: function() {},
+        receive: function() {}
+      },
+
+      syncUpdates: function() {},
+      unsyncUpdates: function() {}
+    };
+  });
+'use strict';
+
+//Setting up route
+angular.module('items').config(['$stateProvider',
+	function($stateProvider) {
+		// Items state routing
+		$stateProvider.
+		state('listItems', {
+			url: '/items',
+			templateUrl: 'modules/items/views/list-items.client.view.html'
+		});
+	}
+]);
+'use strict';
+
+angular.module('items').controller('FavoritesController', ['$scope','$modalInstance', 'Items',
+	function($scope,$modalInstance,Items) {
+		// Favorites controller logic
+		// ...
+		
+	    
+		
+		$scope.find = function(){
+		    $scope.favorites = Items.favorites();
+            console.log($scope.favorites)
+            
+            $scope.favorites.$promise.then(function (result) {
+                $scope.favorites = result;
+                for (var i = 0; i <  $scope.favorites.length; i++) { 
+                    
+                     $scope.favorites[i].addToList = true;
+                    
+                    console.log($scope.favorites);
+                }
+            });
+          
+                
+           
+		};
+		
+		$scope.addToList = function(){
+		
+            for(var i in $scope.favorites){
+                var item = $scope.favorites[i];
+                
+                if(item.addToList){
+                    item.bought = false;
+                    item.inCart =false;
+                
+                    item.$update(function() {
+                        }, function(errorResponse) {
+				            $scope.error = errorResponse.data.message;
+                    });
+                }
+               
+		    }
+		     $modalInstance.close();
+            
+		};
+		
+		$scope.checkAddToList = function(item){
+		
+            item.addToList = !item.addToList;
+            
+		};
+		
+		$scope.cancel = function(){
+		
+           $modalInstance.dismiss('cancel');
+            
+		};
+		
+	}
+]);
+'use strict';
+
+// Items controller
+angular.module('items').controller('ItemsController', ['$scope', '$stateParams', '$location', 'Authentication','$filter', 'Items','Socket',
+	function($scope, $stateParams, $location, Authentication,$filter, Items,Socket) {
+		$scope.authentication = Authentication;
+		
+        		
+		    	//Send join event to join a room
+	    Socket.emit('join', $scope.authentication.user._id) ;
+		
+		
+		
+	
+	
+         
+		
+		$scope.checkIfUserExists = function(){
+		    if (!$scope.authentication.user) $location.path('/signin');
+		    else $location.path('/items');
+		};
+		
+		$scope.checkIfUserExists();
+		//If user is not logged in, redirect to signin page
+		
+		
+		
+		$scope.items = [];
+		
+		$scope.appendItem = function(item){
+		    var resource = new Items();
+		    var updated_item = angular.copy( item, resource);
+		    console.log(updated_item)
+            $scope.items.push(updated_item);
+        };
+        
+        $scope.updateItem = function(item){
+       
+           
+            var resource = new Items();
+            console.log(resource)
+            var oldItem = $filter('filter')($scope.items, {_id:item._id})[0];
+            var index = $scope.items.indexOf(oldItem);
+           
+            $scope.items[index] = angular.copy( item, resource)
+            console.log($scope.items[index])
+            
+        };
+        
+        $scope.deleteItem = function(item){
+           
+            var index = $scope.items.indexOf(item);
+            $scope.items.splice(index,1);
+        };
+          
+            
+		
+		Socket.on('item.created', function(item) {
+            $scope.appendItem(item);
+        });
+        
+        Socket.on('item.updated', function(item) {
+            $scope.updateItem(item);
+        });
+		
+		
+
+		// Create new Item
+		$scope.create = function(name) {
+		    
+		    if(!name) return
+			// Create new Item object
+			var item = new Items ({
+				name: name
+			});
+
+			// Redirect after save
+			item.$save(function(response) {
+				// Clear form fields
+				$scope.name = '';
+			}, function(errorResponse) {
+				$scope.error = errorResponse.data.message;
+			});
+		};
+
+		// Remove existing Item
+		$scope.remove = function(item) {
+			if ( item ) { 
+				item.$remove();
+
+				for (var i in $scope.items) {
+					if ($scope.items [i] === item) {
+						$scope.items.splice(i, 1);
+					}
+				}
+			} else {
+				$scope.item.$remove(function() {
+					$location.path('items');
+				});
+			}
+		};
+
+		// Update existing Item
+		$scope.update = function(item) {
+		    item.$update();
+
+		};
+
+		// Find a list of Items
+		$scope.find = function() {
+			$scope.items = Items.query();
+			
+		
+		};
+
+		// Find existing Item
+		$scope.findOne = function() {
+			$scope.item = Items.get({ 
+				itemId: $stateParams.itemId
+			});
+		};
+		
+		// Favorite item
+		$scope.favorite = function(item) {
+			item.favorite = !item.favorite;
+			$scope.update(item);
+		};
+		
+		//Add item to cart
+		$scope.addToCart = function(item) {
+			item.inCart = !item.inCart;
+			$scope.update(item);
+		};
+		
+		//Clear Cart
+		$scope.clearCart = function() {
+		    console.log('test')
+			var itemsInCart = $filter('filter')($scope.items, {inCart:true, bought:false});
+		
+			for(var i in itemsInCart){
+                itemsInCart[i].bought = true;
+                $scope.update(itemsInCart[i]);
+                console.log('bought',itemsInCart[i])
+			}
+			
+			
+		};
+		
+		
+		
+	}
+]);
+'use strict';
+
+//Items service used to communicate Items REST endpoints
+angular.module('items').factory('Items', ['$resource',
+	function($resource) {
+		return $resource('items/:itemId', { itemId: '@_id'
+		}, {
+		    update: {
+				method: 'PUT'
+			},
+			favorites:{
+			    url: 'favorites',
+			    method: 'GET',
+			    isArray:true,
+			}
+		});
+	}
+]);
+'use strict';
+
+angular.module('recipe').controller('RecipeController', ['$scope','Items','$modalInstance',
+	function($scope,Items,$modalInstance) {
+        $scope.convertRecipe= function() {
+            
+            var items = [];
+            if($scope.recipe)
+                items = $scope.recipe.split('\n');
+                
+                
+            for(var i in items){
+                var item = new Items ({
+                    name: items[i].trim()
+                });
+                item.$save(function(response) {
+                    
+                }, function(errorResponse) {
+                    $scope.error = errorResponse.data.message;
+			    });
+                $scope.recipe = '';
+                
+		    };
+		    
+		    $modalInstance.close();
+
+		};
+		
+		$scope.cancel = function(){
+		
+            $modalInstance.dismiss('cancel');
+            
+		};
+	}
+]);
+'use strict';
+
+angular.module('side-nav').controller('SideNavController', ['$scope', '$modal', '$window',
+	function($scope,$modal, $window) {
+		// Side nav controller logic
+		// ...
+	//init open based on screan size
+    $scope.open = false;
+
+
+
+    $scope.toggle = function(){
+        $scope.open = !$scope.open;
+    };
+		
+	$scope.openProfile = function () {
+
+        var modalInstance = $modal.open({
+          templateUrl: '/modules/users/views/settings/edit-profile.client.view.html',
+          controller: 'SettingsController'
+        });
+	};
+		
+    $scope.openRecipe = function () {
+
+        var modalInstance = $modal.open({
+          templateUrl: '/modules/recipe/views/recipe.client.view.html',
+          controller: 'RecipeController'
+        });
+	};
+	
+	 $scope.openFavorites = function () {
+
+        var modalInstance = $modal.open({
+          templateUrl: '/modules/items/views/favorites.client.view.html',
+          controller: 'FavoritesController'
+        });
+	};
+
+		
+	}
+]);
+'use strict';
+
+// Config HTTP Error Handling
+angular.module('users').config(['$httpProvider',
+	function($httpProvider) {
+		// Set the httpProvider "not authorized" interceptor
+		$httpProvider.interceptors.push(['$q', '$location', 'Authentication',
+			function($q, $location, Authentication) {
+				return {
+					responseError: function(rejection) {
+						switch (rejection.status) {
+							case 401:
+								// Deauthenticate the global user
+								Authentication.user = null;
+
+								// Redirect to signin page
+								$location.path('signin');
+								break;
+							case 403:
+								// Add unauthorized behaviour 
+								break;
+						}
+
+						return $q.reject(rejection);
+					}
+				};
+			}
+		]);
+	}
+]);
+'use strict';
+
+// Setting up route
+angular.module('users').config(['$stateProvider',
+	function($stateProvider) {
+		// Users state routing
+		$stateProvider.
+		state('profile', {
+			url: '/settings/profile',
+			templateUrl: 'modules/users/views/settings/edit-profile.client.view.html'
+		}).
+		state('password', {
+			url: '/settings/password',
+			templateUrl: 'modules/users/views/settings/change-password.client.view.html'
+		}).
+		state('accounts', {
+			url: '/settings/accounts',
+			templateUrl: 'modules/users/views/settings/social-accounts.client.view.html'
+		}).
+		state('signup', {
+			url: '/signup',
+			templateUrl: 'modules/users/views/authentication/signup.client.view.html'
+		}).
+		state('signin', {
+			url: '/signin',
+			templateUrl: 'modules/users/views/authentication/signin.client.view.html'
+		}).
+		state('forgot', {
+			url: '/password/forgot',
+			templateUrl: 'modules/users/views/password/forgot-password.client.view.html'
+		}).
+		state('reset-invalid', {
+			url: '/password/reset/invalid',
+			templateUrl: 'modules/users/views/password/reset-password-invalid.client.view.html'
+		}).
+		state('reset-success', {
+			url: '/password/reset/success',
+			templateUrl: 'modules/users/views/password/reset-password-success.client.view.html'
+		}).
+		state('reset', {
+			url: '/password/reset/:token',
+			templateUrl: 'modules/users/views/password/reset-password.client.view.html'
+		});
+	}
+]);
+'use strict';
+
+angular.module('users').controller('AuthenticationController', ['$scope', '$http', '$location', 'Authentication',
+	function($scope, $http, $location, Authentication) {
+		$scope.authentication = Authentication;
+        $scope.credentials = {username:'tryout',password:'tryout2'}
+		// If user is signed in then redirect back to the items page 
+		if ($scope.authentication.user) $location.path('/items');
+
+		$scope.signup = function() {
+			$http.post('/auth/signup', $scope.credentials).success(function(response) {
+				// If successful we assign the response to the global user model
+				$scope.authentication.user = response;
+
+				// And redirect to the items page
+				$location.path('/items');
+			}).error(function(response) {
+				$scope.error = response.message;
+			});
+		};
+
+		$scope.signin = function() {
+			$http.post('/auth/signin', $scope.credentials).success(function(response) {
+				// If successful we assign the response to the global user model
+				$scope.authentication.user = response;
+
+				// And redirect to the items page
+				$location.path('/items');
+			}).error(function(response) {
+				$scope.error = response.message;
+			});
+		};
+	}
+]);
+'use strict';
+
+angular.module('users').controller('PasswordController', ['$scope', '$stateParams', '$http', '$location', 'Authentication',
+	function($scope, $stateParams, $http, $location, Authentication) {
+		$scope.authentication = Authentication;
+
+		//If user is signed in then redirect back home
+		if ($scope.authentication.user) $location.path('/');
+
+		// Submit forgotten password account id
+		$scope.askForPasswordReset = function() {
+			$scope.success = $scope.error = null;
+
+			$http.post('/auth/forgot', $scope.credentials).success(function(response) {
+				// Show user success message and clear form
+				$scope.credentials = null;
+				$scope.success = response.message;
+
+			}).error(function(response) {
+				// Show user error message and clear form
+				$scope.credentials = null;
+				$scope.error = response.message;
+			});
+		};
+
+		// Change user password
+		$scope.resetUserPassword = function() {
+			$scope.success = $scope.error = null;
+
+			$http.post('/auth/reset/' + $stateParams.token, $scope.passwordDetails).success(function(response) {
+				// If successful show success message and clear form
+				$scope.passwordDetails = null;
+
+				// Attach user profile
+				Authentication.user = response;
+
+				// And redirect to the index page
+				$location.path('/password/reset/success');
+			}).error(function(response) {
+				$scope.error = response.message;
+			});
+		};
+	}
+]);
+'use strict';
+
+angular.module('users').controller('SettingsController', ['$scope', '$http', '$location', 'Users', 'Authentication','$modalInstance',
+	function($scope, $http, $location, Users, Authentication,$modalInstance) {
+		$scope.user = Authentication.user;
+
+		// If user is not signed in then redirect back home
+		if (!$scope.user) $location.path('/');
+
+		// Check if there are additional accounts 
+		$scope.hasConnectedAdditionalSocialAccounts = function(provider) {
+			for (var i in $scope.user.additionalProvidersData) {
+				return true;
+			}
+
+			return false;
+		};
+
+		// Check if provider is already in use with current user
+		$scope.isConnectedSocialAccount = function(provider) {
+			return $scope.user.provider === provider || ($scope.user.additionalProvidersData && $scope.user.additionalProvidersData[provider]);
+		};
+
+		// Remove a user social account
+		$scope.removeUserSocialAccount = function(provider) {
+			$scope.success = $scope.error = null;
+
+			$http.delete('/users/accounts', {
+				params: {
+					provider: provider
+				}
+			}).success(function(response) {
+				// If successful show success message and clear form
+				$scope.success = true;
+				$scope.user = Authentication.user = response;
+			}).error(function(response) {
+				$scope.error = response.message;
+			});
+		};
+
+		// Update a user profile
+		$scope.updateUserProfile = function(isValid) {
+			if (isValid) {
+				$scope.success = $scope.error = null;
+				var user = new Users($scope.user);
+
+				user.$update(function(response) {
+					$scope.success = true;
+					Authentication.user = response;
+				}, function(response) {
+					$scope.error = response.data.message;
+				});
+			} else {
+				$scope.submitted = true;
+			}
+		};
+
+		// Change user password
+		$scope.changeUserPassword = function() {
+			$scope.success = $scope.error = null;
+
+			$http.post('/users/password', $scope.passwordDetails).success(function(response) {
+				// If successful show success message and clear form
+				$scope.success = true;
+				$scope.passwordDetails = null;
+			}).error(function(response) {
+				$scope.error = response.message;
+			});
+		};
+		
+		$scope.cancel = function(){
+		
+            $modalInstance.dismiss('cancel');
+            
+		};
+	}
+]);
+'use strict';
+
+// Authentication service for user variables
+angular.module('users').factory('Authentication', [
+	function() {
+		var _this = this;
+
+		_this._data = {
+			user: window.user
+		};
+
+		return _this._data;
+	}
+]);
+'use strict';
+
+// Users service used for communicating with the users REST endpoint
+angular.module('users').factory('Users', ['$resource',
+	function($resource) {
+		return $resource('users', {}, {
+			update: {
+				method: 'PUT'
+			}
+		});
+	}
+]);
