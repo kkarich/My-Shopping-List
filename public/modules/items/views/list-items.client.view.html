@@ -29,14 +29,14 @@
                             </form>
                             
                             <div class="list-group">
-                                <div data-ng-repeat="item in list = (items | filter:{bought:'False'} | orderBy : 'inCart')" class="list-group-item">
+                                <div data-ng-repeat="item in list = (items | filter:{bought:'False'} )" class="list-group-item">
                                 <div class="row">
                                     <div class="col-xs-1">
                                         <i ng-class="item.inCart? ' fa fa-check-square-o fa-2x' : 'fa fa-square-o fa-2x'" ng-click="addToCart(item)" ></i>
                                     </div>
                                     
                                     <div class="col-xs-8 col-sm-10">
-                                        <h4 class="list-group-item-heading" data-ng-bind="item.name"></h4>
+                                        <p ng-class="{'in-cart': item.inCart}" class="list-group-item-heading" >{{item.name}}</p>
                                     </div>
                                     
                                     <div class="col-xs-1">

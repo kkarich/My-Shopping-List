@@ -150,3 +150,13 @@ color: #F2F2F2;
 }
 
 
+/*
+
+List css
+
+*/
+
+.list-group-item p.in-cart{
+    text-decoration: line-through;
+    color:#7F8C8D;
+}
